@@ -1,0 +1,13 @@
+current directory: /Users/trandat/Documents/OddleRNChallenge/vendor/bundle/ruby/2.7.0/gems/json-2.6.1/ext/json
+/Users/trandat/.rvm/rubies/ruby-2.7.4/bin/ruby -I /Users/trandat/.rvm/rubies/ruby-2.7.4/lib/ruby/2.7.0 -r ./siteconf20220622-73983-1gvexyp.rb extconf.rb
+creating Makefile
+
+current directory: /Users/trandat/Documents/OddleRNChallenge/vendor/bundle/ruby/2.7.0/gems/json-2.6.1/ext/json
+make "DESTDIR=" clean
+
+current directory: /Users/trandat/Documents/OddleRNChallenge/vendor/bundle/ruby/2.7.0/gems/json-2.6.1/ext/json
+make "DESTDIR="
+make: Nothing to be done for `all'.
+
+current directory: /Users/trandat/Documents/OddleRNChallenge/vendor/bundle/ruby/2.7.0/gems/json-2.6.1/ext/json
+make "DESTDIR=" install
