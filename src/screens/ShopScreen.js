@@ -76,7 +76,7 @@ const ShopScreen = ({params}) => {
   };
 
   const renderItems = ({item, index}) => {
-    console.log(`item-${index}`, item);
+    // console.log(`item-${index}`, item);
     return <ProductCard item={item} />;
   };
 

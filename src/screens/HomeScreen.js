@@ -54,10 +54,10 @@ const HomeScreen = ({params}) => {
 
   // console.log('getProductList-2', listItems);
 
-  const renderItems = ({item, index}) => {
-    console.log(`item-${index}`, item);
-    return <ProductCard />;
-  };
+  // const renderItems = ({item, index}) => {
+  //   // console.log(`item-${index}`, item);
+  //   return <ProductCard />;
+  // };
 
   return (
     <LinearGradient colors={[Colors.lightPurple, Colors.aqua, Colors.white]}>
@@ -67,7 +67,7 @@ const HomeScreen = ({params}) => {
           <View style={{paddingLeft: 16}}>
             <Text style={styles.title}>{'Recommended for you'}</Text>
           </View>
-          <FlatList
+          {/* <FlatList
             data={listItems}
             keyExtractor={item => item.productID}
             renderItem={renderItems}
@@ -78,7 +78,7 @@ const HomeScreen = ({params}) => {
               marginBottom: 30,
               paddingLeft: 16,
             }}
-          />
+          /> */}
           <View style={{paddingLeft: 16}}>
             <Text style={styles.title}>{`Because you like ${''}`}</Text>
           </View>

@@ -12,6 +12,8 @@ const fetchEndpoint =
 const fetchLikeEndpoint =
   'https://oddle-challenge-api.herokuapp.com/api/accounts';
 
+const productDetailEndpoint = 'http://makeup-api.herokuapp.com/api/v1/products';
+
 const getProductList = async (pageSize = 10) => {
   const result = await queryData(getProductListQuery, pageSize);
   console.log('getProductList', result);
@@ -26,24 +28,23 @@ export const getQueryVariables = page => {
   return {take, skip, orderBy};
 };
 
-const getFavouriteProducts = () => {
-  var myHeaders = new Headers();
-  myHeaders.append('Authorization', Credential.apiKey);
-
-  var requestOptions = {
-    headers: myHeaders,
-    redirect: 'follow',
-  };
-
-  axios
-    .get(`${fetchLikeEndpoint}/${Credential.accountName}/favourites`, {
-      headers: {
-        Authorization: Credential.apiKey,
+const getFavouriteProducts = async () => {
+  let result;
+  try {
+    result = await axios.get(
+      `${fetchLikeEndpoint}/${Credential.accountName}/favourites`,
+      {
+        headers: {
+          Authorization: Credential.apiKey,
+        },
       },
-    })
-    .then(response => response.data)
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
+    );
+  } catch (e) {}
+
+  return result?.data?.data ?? [];
+  // .then(response => response.data)
+  // .then(result => result.data)
+  // .catch(error => console.log('error', error));
 };
 
 // const getProductList = async (page = 0) => {
@@ -56,4 +57,9 @@ const getFavouriteProducts = () => {
 //   return data;
 // };
 
-export {fetchEndpoint, getProductList, getFavouriteProducts};
+export {
+  fetchEndpoint,
+  productDetailEndpoint,
+  getProductList,
+  getFavouriteProducts,
+};
