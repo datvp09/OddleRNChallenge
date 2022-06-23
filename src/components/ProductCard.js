@@ -46,8 +46,9 @@ const ProductCard = ({item}) => {
     const productUrl = productApiUrl.replace('http', 'https');
     try {
       const result = await axios.get(productUrl);
-      // console.log('getProductDetail', result);
-      setProductDetail(result?.data);
+      const _ = require('lodash');
+      const objTransformed = _.mapKeys(result?.data, (v, k) => _.camelCase(k));
+      setProductDetail(objTransformed);
     } catch (e) {
       console.log('getProductDetail-e', productUrl, e);
     }
@@ -58,7 +59,7 @@ const ProductCard = ({item}) => {
   };
 
   const renderImage = () => {
-    if (!productDetail?.['image_link']) {
+    if (!productDetail?.imageLink) {
       return null;
     }
 
@@ -75,7 +76,7 @@ const ProductCard = ({item}) => {
           source={{
             uri: imageError
               ? Images.notFoundImageUrl
-              : productDetail?.['image_link'],
+              : productDetail?.imageLink,
           }}
           style={styles.productImage}
           onError={onImageNotFound}
@@ -86,9 +87,7 @@ const ProductCard = ({item}) => {
   };
 
   const viewBrand = () => {
-    console.log('view-brand', productDetail?.['website_link']);
-
-    if (!productDetail?.['website_link']) {
+    if (!productDetail?.websiteLink) {
       return;
     }
     let title;
@@ -96,17 +95,17 @@ const ProductCard = ({item}) => {
       title = productDetail?.brand + ' store';
     }
     navigation.navigate('WebviewScreen', {
-      url: productDetail?.['website_link'],
+      url: productDetail?.websiteLink,
       title,
     });
   };
 
   const orderNow = async () => {
-    if (!productDetail?.['product_link']) {
+    if (!productDetail?.productLink) {
       return;
     }
 
-    const url = productDetail?.['product_link'];
+    const url = productDetail?.productLink;
     if (await InAppBrowser.isAvailable()) {
       InAppBrowser.open(url, {});
     } else {
@@ -155,14 +154,14 @@ const ProductCard = ({item}) => {
               {/* <Image source={Images.star} style={styles.starIcon} /> */}
               <SvgIcon name={'star'} />
               <View style={styles.space} />
-              <Text>{productDetail?.['rating'] || 'N/A'}</Text>
+              <Text>{productDetail?.rating || 'N/A'}</Text>
             </View>
             <View style={styles.space2} />
             <View style={styles.rowCenter}>
               {/* <Image source={Images.dollar} style={styles.dollarIcon} /> */}
               <SvgIcon name={'dollar'} />
               <View style={styles.space} />
-              <Text>{productDetail?.['price']}</Text>
+              <Text>{productDetail?.price}</Text>
             </View>
           </View>
           <View style={styles.rowCenter}>
