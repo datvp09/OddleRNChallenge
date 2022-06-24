@@ -1,61 +1,44 @@
-import axios from 'axios';
 import React, {useEffect, useState} from 'react';
-import {Text, StyleSheet, FlatList} from 'react-native';
+import {StyleSheet, FlatList} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FavouriteHeader from '../components/FavouriteHeader';
-import {getFavouriteProducts, productDetailEndpoint} from '../core/api';
+import ListEmptyComponent from '../components/ListEmptyComponent';
+import ProductCard from '../components/ProductCard';
+import {useFavouriteData} from '../providers/FavouriteProvider';
 
 const FavouriteScreen = ({params}) => {
-  const [listFavourite, setListFavourite] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const {isFetching, favouriteProducts, getFavouriteProducts} =
+    useFavouriteData();
+
+  console.log(
+    'useFavouriteData',
+    isFetching,
+    favouriteProducts,
+    getFavouriteProducts,
+  );
 
   useEffect(() => {
-    getFavouriteList();
+    if (favouriteProducts.length == 0) {
+      getFavouriteProducts();
+    }
   }, []);
 
-  const getFavouriteList = async () => {
-    setRefreshing(false);
-    try {
-      const list = await getFavouriteProducts();
-
-      if (!list) {
-        return;
-      }
-      const getDetailPromises = list.map(id =>
-        axios.get(`${productDetailEndpoint}/${id}.json`),
-      );
-      const result = await Promise.all(getDetailPromises);
-      console.log(
-        'getDetailPromises',
-        result.map(res => res.data),
-      );
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   const renderItems = ({item, index}) => {
-    // console.log(`item-${index}`, item);
-    return <ProductCard item={item} />;
+    return <ProductCard item={item} isFavourite={true} />;
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['right', 'top', 'left']}>
       <FavouriteHeader />
       <FlatList
-        data={listItems}
+        data={favouriteProducts}
         keyExtractor={item => `${item.id}`}
         renderItem={renderItems}
-        style={{
-          paddingLeft: 16,
-        }}
-        contentContainerStyle={{
-          paddingTop: 10,
-          paddingBottom: 30,
-        }}
-        refreshing={refreshing}
-        onRefresh={getFavouriteList}
+        contentContainerStyle={styles.contentContainerStyle}
+        refreshing={isFetching}
+        onRefresh={getFavouriteProducts}
+        ListEmptyComponent={ListEmptyComponent}
+        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
@@ -66,6 +49,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     paddingBottom: 0,
+  },
+  contentContainerStyle: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
 });
 

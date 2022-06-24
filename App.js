@@ -14,6 +14,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import RootNavigator from './src/core/navigators/RootNavigator';
 import {setDefaultFontFamily} from './src/utils/functions';
 import {setCustomText} from 'react-native-global-props';
+import {FavouriteProvider} from './src/providers/FavouriteProvider';
 
 Object.defineProperty(String.prototype, 'capitalize', {
   value: function () {
@@ -47,12 +48,14 @@ const App = () => {
     // <QueryClientWrapper>
     <GestureHandlerRootView style={{flex: 1}}>
       <NavigationContainer>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={'transparent'}
-          translucent={true}
-        />
-        <RootNavigator />
+        <FavouriteProvider>
+          <StatusBar
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={'transparent'}
+            translucent={true}
+          />
+          <RootNavigator />
+        </FavouriteProvider>
       </NavigationContainer>
     </GestureHandlerRootView>
     // </QueryClientWrapper>
