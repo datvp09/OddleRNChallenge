@@ -1,13 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
-  TouchableOpacity,
-  Linking,
-} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity, Linking} from 'react-native';
 import axios from 'axios';
 import Colors from '../utils/colors';
 import Images from '../utils/images';
@@ -17,8 +9,10 @@ import {DoubleTap} from './DoubleTap';
 import {useNavigation} from '@react-navigation/native';
 import {InAppBrowser} from 'react-native-inappbrowser-reborn';
 import SvgIcon from './SvgIcon';
+import {likeProduct, unlikeProduct} from '../core/api';
+import {useFavouriteData} from '../providers/FavouriteProvider';
 
-const ProductCard = ({item}) => {
+const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   const {
     brand,
     productApiUrl,
@@ -28,14 +22,30 @@ const ProductCard = ({item}) => {
     price,
     category,
     productType,
+    productID,
   } = item;
-  const [productDetail, setProductDetail] = useState();
+  const [productDetail, setProductDetail] = useState(isFavourite ? item : {});
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const {favouriteProducts, getFavouriteProducts} = useFavouriteData();
+  const productId = isFavourite ? productDetail?.id : productID;
+  const isLiked =
+    isFavourite || favouriteProducts.map(pro => pro.id).includes(productId);
+  const [likeStatus, setLikeStatus] = useState(isLiked);
   const navigation = useNavigation();
 
+  // console.log(
+  //   'ProductCard-detail',
+  //   productId,
+  //   favouriteProducts,
+  //   isLiked,
+  //   likeStatus,
+  // );
+
   useEffect(() => {
-    getProductDetail();
+    if (!isFavourite) {
+      getProductDetail();
+    }
   }, []);
 
   const onImageNotFound = () => {
@@ -78,6 +88,7 @@ const ProductCard = ({item}) => {
               ? Images.notFoundImageUrl
               : productDetail?.imageLink,
           }}
+          resizeMode={FastImage.resizeMode.contain}
           style={styles.productImage}
           onError={onImageNotFound}
           onLoadEnd={() => setImageLoading(false)}
@@ -113,60 +124,64 @@ const ProductCard = ({item}) => {
     }
   };
 
-  const onFavouritePress = () => {};
+  const onFavouritePress = async () => {
+    setLikeStatus(liked => !liked);
+    console.log('productId:', productId);
+    if (likeStatus) {
+      await unlikeProduct(productId);
+    } else {
+      await likeProduct(productId);
+      getFavouriteProducts();
+    }
+  };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          width: horizontal ? 282 : width - 36,
+          marginRight: horizontal ? 20 : 0,
+        },
+      ]}>
       <View style={styles.imageWrap}>
         {renderImage()}
-        <View
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            paddingHorizontal: 6,
-            paddingVertical: 5,
-            borderRadius: 6,
-            backgroundColor: Colors.lightGrey,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <View style={styles.brandWrap}>
           <Text style={styles.normalText}>{brand}</Text>
         </View>
         <TouchableOpacity
           style={styles.favouriteButton}
           onPress={onFavouritePress}>
-          <SvgIcon name={'heart'} size={20} />
+          <SvgIcon name={likeStatus ? 'heart-selected' : 'heart'} size={20} />
         </TouchableOpacity>
       </View>
-      <View style={styles.contentWrap}>
+      <View style={[styles.contentWrap]}>
         <View style={styles.contents}>
           <Text style={styles.title} numberOfLines={2}>
             {name}
           </Text>
           {!!tagList && tagList?.length > 0 ? (
-            <Text style={styles.tags}>{tagList.join(', ')}</Text>
+            <Text style={styles.tags} numberOfLines={1}>
+              {tagList.join(', ')}
+            </Text>
           ) : (
             <Text style={styles.tags}>{'N/A'}</Text>
           )}
           <View style={[styles.rowCenter, {marginBottom: 5}]}>
             <View style={styles.rowCenter}>
-              {/* <Image source={Images.star} style={styles.starIcon} /> */}
-              <SvgIcon name={'star'} />
+              <SvgIcon name={'star'} size={14} />
               <View style={styles.space} />
               <Text>{productDetail?.rating || 'N/A'}</Text>
             </View>
             <View style={styles.space2} />
             <View style={styles.rowCenter}>
-              {/* <Image source={Images.dollar} style={styles.dollarIcon} /> */}
-              <SvgIcon name={'dollar'} />
+              <SvgIcon name={'dollar'} size={14} />
               <View style={styles.space} />
               <Text>{productDetail?.price}</Text>
             </View>
           </View>
           <View style={styles.rowCenter}>
-            {/* <Image source={Images.info} style={styles.dollarIcon} /> */}
-            <SvgIcon name={'info'} />
+            <SvgIcon name={'info'} size={20} />
             <View style={styles.space} />
             <Text>{`${(category || 'N/A').capitalize()} - ${(
               productType || 'N/A'
@@ -189,11 +204,9 @@ const ProductCard = ({item}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: Colors.smokeGrey,
     // height: 372,
-    flex: 1,
-    maxWidth: width - 36,
+    // flex: 1,
     marginBottom: 25,
     borderRadius: 8,
     // borderWidth: 1,
@@ -206,7 +219,12 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOpacity: 1,
   },
-  imageWrap: {height: 205},
+  imageWrap: {
+    height: 205,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
   favouriteButton: {
     position: 'absolute',
     top: 10,
@@ -231,6 +249,8 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
     paddingHorizontal: 8,
+    // borderWidth: 1,
+    // borderColor: 'red',
   },
   contents: {marginBottom: 15},
   imageLoading: {
@@ -259,8 +279,6 @@ const styles = StyleSheet.create({
   rowCenter: {flexDirection: 'row', alignItems: 'center'},
   space: {width: 6},
   space2: {width: 10},
-  starIcon: {marginBottom: 2, width: 16, height: 16},
-  dollarIcon: {width: 16, height: 16},
   buttonViewBrand: {
     width: 120,
     height: 38,
@@ -290,6 +308,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     fontWeight: 'bold',
+  },
+  brandWrap: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 5,
+    borderRadius: 6,
+    backgroundColor: Colors.lightGrey,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

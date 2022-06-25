@@ -2,23 +2,17 @@ import React, {useState, useEffect} from 'react';
 import {
   Text,
   View,
-  Image,
   StyleSheet,
   FlatList,
   ActivityIndicator,
 } from 'react-native';
 import Colors from '../utils/colors';
-import Images from '../utils/images';
-import Credential from '../config/credential';
 import ProductCard from '../components/ProductCard';
-import {request, gql} from 'graphql-request';
-import {fetchEndpoint, getQueryVariables} from '../core/api';
 import {getProductListQuery} from '../core/query';
 import {graphCMS} from '../core/graphcms';
 import {formatNumber, welcomeText} from '../utils/functions';
 import LinearGradient from 'react-native-linear-gradient';
 import {QUERY_LIMIT} from '../core/request';
-import SvgIcon from '../components/SvgIcon';
 import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
@@ -27,7 +21,7 @@ const ShopScreen = ({params}) => {
   const [totalItems, setTotalItems] = useState();
   const [currentPage, setCurrentPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
-  const [refreshing, setRefreshing] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
 
   useEffect(() => {
@@ -35,6 +29,7 @@ const ShopScreen = ({params}) => {
   }, []);
 
   const getProductList = async (isRefresh = false) => {
+    setRefreshing(true);
     try {
       console.log('call-getItems-1', currentPage);
       const result = await graphCMS.request(getProductListQuery, {
@@ -58,13 +53,6 @@ const ShopScreen = ({params}) => {
   };
 
   const onRefresh = () => getProductList(true);
-
-  console.log(
-    'listItems',
-    currentPage,
-    listItems.length,
-    listItems.map(pro => pro.productID),
-  );
 
   const onEndReached = async () => {
     if (!hasNextPage || fetchingMore) {
@@ -116,14 +104,9 @@ const ShopScreen = ({params}) => {
           data={listItems}
           keyExtractor={item => `${item.productID}`}
           renderItem={renderItems}
-          style={{
-            paddingLeft: 16,
-          }}
-          contentContainerStyle={{
-            paddingTop: 10,
-            paddingBottom: 30,
-          }}
+          contentContainerStyle={styles.contentContainerStyle}
           refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           onEndReached={onEndReached}
           ListHeaderComponent={renderHeader}
@@ -148,6 +131,11 @@ const styles = StyleSheet.create({
   },
   totalItems: {
     color: Colors.charcoal,
+  },
+  contentContainerStyle: {
+    paddingTop: 10,
+    paddingBottom: 30,
+    paddingHorizontal: 16,
   },
 });
 

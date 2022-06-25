@@ -5,6 +5,7 @@ import {getProductListQuery} from './query';
 import {queryData} from './request';
 
 const PAGE_SIZE = 10;
+const INITIAL_RENDER_ITEMS = 10;
 
 const fetchEndpoint =
   'https://api-ap-northeast-1.graphcms.com/v2/cl49zomnx1n4f01w892q05vkz/master';
@@ -16,9 +17,8 @@ const productDetailEndpoint = 'http://makeup-api.herokuapp.com/api/v1/products';
 
 const getProductList = async (pageSize = 10) => {
   const result = await queryData(getProductListQuery, pageSize);
-  console.log('getProductList', result);
 
-  return result?.['data'];
+  return result?.data;
 };
 
 export const getQueryVariables = page => {
@@ -28,23 +28,90 @@ export const getQueryVariables = page => {
   return {take, skip, orderBy};
 };
 
-const getFavouriteProducts = async () => {
-  let result;
+const getFavouriteProductIds = async () => {
+  let resIds;
   try {
-    result = await axios.get(
-      `${fetchLikeEndpoint}/${Credential.accountName}/favourites`,
-      {
-        headers: {
-          Authorization: Credential.apiKey,
-        },
+    const config = {
+      method: 'get',
+      url: `${fetchLikeEndpoint}/${Credential.accountName}/favourites`,
+      headers: {
+        Authorization: Credential.apiKey,
       },
+    };
+    resIds = await axios(config);
+  } catch (e) {}
+
+  return resIds?.data?.data || [];
+};
+
+const getFavouriteProducts = async () => {
+  const list = await getFavouriteProductIds();
+  if (!list) {
+    return;
+  }
+
+  let listTransformed;
+
+  try {
+    const getDetailPromises = list.map(id =>
+      axios.get(`${productDetailEndpoint}/${id}.json`),
+    );
+    const result = await Promise.all(getDetailPromises);
+    const _ = require('lodash');
+    listTransformed = result.map(res =>
+      _.mapKeys(res.data, (v, k) => _.camelCase(k)),
     );
   } catch (e) {}
 
-  return result?.data?.data ?? [];
-  // .then(response => response.data)
-  // .then(result => result.data)
-  // .catch(error => console.log('error', error));
+  return listTransformed || [];
+};
+
+const likeProduct = async id => {
+  if (!id) {
+    return;
+  }
+
+  let result;
+  try {
+    const config = {
+      method: 'patch',
+      url: `${fetchLikeEndpoint}/${Credential.accountName}/favourites/${id}`,
+      headers: {
+        Authorization: Credential.apiKey,
+      },
+    };
+    result = await axios(config);
+  } catch (e) {}
+
+  return result?.data;
+};
+
+const unlikeProduct = async id => {
+  if (!id) {
+    return;
+  }
+
+  let result;
+  try {
+    // result = await axios.delete(
+    //   `${fetchLikeEndpoint}/${Credential.accountName}/favourites/${id}`,
+    //   {
+    //     headers: {
+    //       Authorization: Credential.apiKey,
+    //     },
+    //   },
+    // );
+    const config = {
+      method: 'delete',
+      url: `${fetchLikeEndpoint}/${Credential.accountName}/favourites/${id}`,
+      headers: {
+        Authorization: Credential.apiKey,
+      },
+    };
+    result = await axios(config);
+  } catch (e) {}
+
+  return result?.data;
 };
 
 // const getProductList = async (page = 0) => {
@@ -62,4 +129,7 @@ export {
   productDetailEndpoint,
   getProductList,
   getFavouriteProducts,
+  likeProduct,
+  unlikeProduct,
+  INITIAL_RENDER_ITEMS,
 };
