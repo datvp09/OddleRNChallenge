@@ -6,16 +6,9 @@ import ListEmptyComponent from '../components/ListEmptyComponent';
 import ProductCard from '../components/ProductCard';
 import {useFavouriteData} from '../providers/FavouriteProvider';
 
-const FavouriteScreen = ({params}) => {
+const FavouriteScreen = () => {
   const {isFetching, favouriteProducts, getFavouriteProducts} =
     useFavouriteData();
-
-  console.log(
-    'useFavouriteData',
-    isFetching,
-    favouriteProducts,
-    getFavouriteProducts,
-  );
 
   useEffect(() => {
     if (favouriteProducts.length == 0) {

@@ -1,11 +1,8 @@
-// import {useQuery} from 'react-query';
 import axios from 'axios';
 import Credential from '../config/credential';
-import {getProductListQuery} from './query';
-import {queryData} from './request';
 
-const PAGE_SIZE = 10;
 const INITIAL_RENDER_ITEMS = 10;
+const QUERY_LIMIT = 10;
 
 const fetchEndpoint =
   'https://api-ap-northeast-1.graphcms.com/v2/cl49zomnx1n4f01w892q05vkz/master';
@@ -15,15 +12,9 @@ const fetchLikeEndpoint =
 
 const productDetailEndpoint = 'http://makeup-api.herokuapp.com/api/v1/products';
 
-const getProductList = async (pageSize = 10) => {
-  const result = await queryData(getProductListQuery, pageSize);
-
-  return result?.data;
-};
-
 export const getQueryVariables = page => {
-  const skip = (page - 1) * PAGE_SIZE;
-  const take = PAGE_SIZE;
+  const skip = (page - 1) * QUERY_LIMIT;
+  const take = QUERY_LIMIT;
   const orderBy = {createdAt: 'desc'};
   return {take, skip, orderBy};
 };
@@ -93,14 +84,6 @@ const unlikeProduct = async id => {
 
   let result;
   try {
-    // result = await axios.delete(
-    //   `${fetchLikeEndpoint}/${Credential.accountName}/favourites/${id}`,
-    //   {
-    //     headers: {
-    //       Authorization: Credential.apiKey,
-    //     },
-    //   },
-    // );
     const config = {
       method: 'delete',
       url: `${fetchLikeEndpoint}/${Credential.accountName}/favourites/${id}`,
@@ -114,22 +97,12 @@ const unlikeProduct = async id => {
   return result?.data;
 };
 
-// const getProductList = async (page = 0) => {
-//   console.log('useQuery', useQuery);
-//   const {data, loading, error} = useQuery(getProductListQuery, {
-//     variables: getQueryVariables(page),
-//   });
-//   console.log('getProductList', data, loading, error);
-
-//   return data;
-// };
-
 export {
   fetchEndpoint,
   productDetailEndpoint,
-  getProductList,
   getFavouriteProducts,
   likeProduct,
   unlikeProduct,
   INITIAL_RENDER_ITEMS,
+  QUERY_LIMIT,
 };

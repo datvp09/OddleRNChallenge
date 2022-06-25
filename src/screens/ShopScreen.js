@@ -12,7 +12,7 @@ import {getProductListQuery} from '../core/query';
 import {graphCMS} from '../core/graphcms';
 import {formatNumber, welcomeText} from '../utils/functions';
 import LinearGradient from 'react-native-linear-gradient';
-import {QUERY_LIMIT} from '../core/request';
+import {QUERY_LIMIT} from '../core/api';
 import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CardPlaceHolder from '../components/CardPlaceHolder';
@@ -26,8 +26,6 @@ const ShopScreen = ({params}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
 
-  console.log('refreshing', refreshing);
-
   useEffect(() => {
     getProductList();
   }, []);
@@ -35,13 +33,12 @@ const ShopScreen = ({params}) => {
   const getProductList = async (isRefresh = false) => {
     setRefreshing(true);
     try {
-      console.log('call-getItems-1', currentPage);
       const result = await graphCMS.request(getProductListQuery, {
         limit: QUERY_LIMIT,
         offset: (isRefresh ? 0 : currentPage) * QUERY_LIMIT,
       });
       setCurrentPage(isRefresh ? 0 : currentPage + 1);
-      console.log('call-setListItems-1');
+
       if (isRefresh) {
         setListItems(result?.products);
       } else {
@@ -68,7 +65,6 @@ const ShopScreen = ({params}) => {
   };
 
   const renderItems = ({item, index}) => {
-    // console.log(`item-${index}`, item);
     return <ProductCard item={item} />;
   };
 
@@ -135,7 +131,6 @@ const ShopScreen = ({params}) => {
             ListFooterComponent={renderFooter}
           />
         )}
-        {/* {renderListPlaceholder()} */}
       </LinearGradient>
     </SafeAreaView>
   );

@@ -15,7 +15,6 @@ export const FavouriteProvider = ({children}) => {
     setIsFetching(true);
     try {
       const data = await getFavouriteProductsAPI();
-      console.log('getFavouriteProductsAPI', data);
       setFavouriteProducts(data);
     } catch (e) {
       console.log('getFavouriteProductsAPI-e', e);

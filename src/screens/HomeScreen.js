@@ -1,40 +1,29 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Text,
   View,
   FlatList,
   StyleSheet,
-  Image,
   ScrollView,
   RefreshControl,
-  ActivityIndicator,
   Platform,
 } from 'react-native';
-import {
-  fetchEndpoint,
-  getQueryVariables,
-  INITIAL_RENDER_ITEMS,
-} from '../core/api';
-import {request, gql} from 'graphql-request';
+import {INITIAL_RENDER_ITEMS} from '../core/api';
 import ProductCard from '../components/ProductCard';
-import Credential from '../config/credential';
 import Colors from '../utils/colors';
-import {welcomeText} from '../utils/functions';
-import SvgIcon from '../components/SvgIcon';
 import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import {useFavouriteData} from '../providers/FavouriteProvider';
-import ListEmptyComponent from '../components/ListEmptyComponent';
-import {useFocusEffect} from '@react-navigation/native';
 import {graphCMS} from '../core/graphcms';
 import {
   getRecommendProductsQuery,
   getSimilarProductQuery,
   getTrendingProductQuery,
 } from '../core/query';
-import {QUERY_LIMIT} from '../core/request';
+import {QUERY_LIMIT} from '../core/api';
 import CardPlaceHolder from '../components/CardPlaceHolder';
+import ListEmptyComponent from '../components/ListEmptyComponent';
 
 const HomeScreen = ({params}) => {
   // Recommend
@@ -71,14 +60,19 @@ const HomeScreen = ({params}) => {
   useEffect(() => {
     if (favouriteProducts.length > 0) {
       getHomeData();
+    } else {
+      resetData();
     }
   }, [favouriteProducts]);
 
-  useFocusEffect(
-    useCallback(() => {
-      getFavouriteProducts();
-    }, []),
-  );
+  const resetData = () => {
+    setCurrentRecommendPage(0);
+    setCurrentSimilarPage(0);
+    setCurrentTrendingPage(0);
+    setListRecommended([]);
+    setListSimilar([]);
+    setListTrending([]);
+  };
 
   const getHomeData = async () => {
     if (isGettingHomeData.current) {
@@ -87,14 +81,7 @@ const HomeScreen = ({params}) => {
     isGettingHomeData.current = true;
     favouriteProductBrand.current = favouriteProducts[0].brand;
     favouriteProductType.current = favouriteProducts[0].productType;
-    console.log(
-      'favouriteProducts',
-      favouriteProductBrand.current,
-      favouriteProductType.current,
-      favouriteProducts[0],
-    );
 
-    console.log('callxxx-1111');
     await Promise.all([
       getRecommendProducts(favouriteProductType.current, {isRefresh: false}),
       getSimilarProducts(favouriteProductBrand.current, {isRefresh: false}),
@@ -111,18 +98,12 @@ const HomeScreen = ({params}) => {
       setFetchingRecommended(true);
     }
     try {
-      // console.log(
-      //   'call-getRecommendProducts',
-      //   isRefresh,
-      //   (isRefresh ? 0 : currentRecommendPage) * QUERY_LIMIT,
-      // );
       const result = await graphCMS.request(getRecommendProductsQuery, {
         productType,
         limit: QUERY_LIMIT,
         offset: (isRefresh ? 0 : currentRecommendPage) * QUERY_LIMIT,
       });
       setCurrentRecommendPage(isRefresh ? 0 : currentRecommendPage + 1);
-      console.log('call-getRecommendProducts-res', result);
 
       if (isRefresh) {
         setListRecommended(result?.products);
@@ -144,18 +125,12 @@ const HomeScreen = ({params}) => {
       setFetchingSimilar(true);
     }
     try {
-      console.log(
-        'call-getSimilarProducts',
-        isRefresh,
-        (isRefresh ? 0 : currentSimilarPage) * QUERY_LIMIT,
-      );
       const result = await graphCMS.request(getSimilarProductQuery, {
         brand,
         limit: QUERY_LIMIT,
         offset: (isRefresh ? 0 : currentSimilarPage) * QUERY_LIMIT,
       });
       setCurrentSimilarPage(isRefresh ? 0 : currentSimilarPage + 1);
-      console.log('call-getSimilarProducts', result);
 
       if (isRefresh) {
         setListSimilar(result?.products);
@@ -177,18 +152,11 @@ const HomeScreen = ({params}) => {
       setFetchingTrending(true);
     }
     try {
-      console.log(
-        'call-getTrendingProducts',
-        isRefresh,
-        isFetchingMore,
-        (isRefresh ? 0 : currentTrendingPage) * QUERY_LIMIT,
-      );
       const result = await graphCMS.request(getTrendingProductQuery, {
         limit: QUERY_LIMIT,
         offset: (isRefresh ? 0 : currentTrendingPage) * QUERY_LIMIT,
       });
       setCurrentTrendingPage(isRefresh ? 0 : currentTrendingPage + 1);
-      console.log('call-getTrendingProducts', result);
 
       if (isRefresh) {
         setListTrending(result?.products);
@@ -206,21 +174,11 @@ const HomeScreen = ({params}) => {
     if (favouriteProducts.length == 0) {
       getFavouriteProducts();
     } else {
-      console.log('callxxx-2222');
       getRecommendProducts(favouriteProductType.current, {isRefresh: true});
       getSimilarProducts(favouriteProductBrand.current, {isRefresh: true});
       getTrendingProducts({isRefresh: true});
     }
   };
-
-  const renderEmptyText = () => {
-    return (
-      <View style={{paddingLeft: 16, marginBottom: 50}}>
-        <Text>{'No results to show'}</Text>
-      </View>
-    );
-  };
-
   const renderItems = ({item, index}) => {
     return <ProductCard item={item} horizontal />;
   };
@@ -301,19 +259,18 @@ const HomeScreen = ({params}) => {
   };
 
   const renderScrollViewContent = () => {
-    // if (favouriteProducts.length == 0) {
-    //   return <ListEmptyComponent />;
-    // }
+    if (favouriteProducts.length == 0 && !isFetching) {
+      return <ListEmptyComponent />;
+    }
     const noData = favouriteProducts.length == 0;
-
-    console.log('fetchingTrending', fetchingTrending);
 
     return (
       <>
-        <View style={{paddingLeft: 16}}>
-          <Text style={styles.title}>{'Recommended for you'}</Text>
-        </View>
-        {noData && renderEmptyText()}
+        {(!isFetching || listRecommended.length > 0) && (
+          <View style={styles.sectionTitle}>
+            <Text style={styles.title}>{'Recommended for you'}</Text>
+          </View>
+        )}
         {fetchingRecommended ? (
           renderListPlaceholder()
         ) : (
@@ -336,7 +293,7 @@ const HomeScreen = ({params}) => {
           />
         )}
         {!noData && (
-          <View style={{paddingLeft: 16}}>
+          <View style={styles.sectionTitle}>
             <Text style={styles.title}>{`Because you like ${''}`}</Text>
           </View>
         )}
@@ -362,11 +319,10 @@ const HomeScreen = ({params}) => {
           />
         )}
         {!noData && (
-          <View style={{paddingLeft: 16}}>
+          <View style={styles.sectionTitle}>
             <Text style={styles.title}>{'Trending items'}</Text>
           </View>
         )}
-        {noData && renderEmptyText()}
         {fetchingTrending ? (
           renderListPlaceholder()
         ) : (
@@ -423,7 +379,7 @@ const styles = StyleSheet.create({
   scrollView: {height: '100%'},
   scrollViewContent: {
     paddingTop: 6,
-    paddingBottom: Platform.select({ios: 130, android: 195}),
+    paddingBottom: Platform.select({ios: 140, android: 195}),
   },
   container: {
     paddingVertical: 18,
@@ -446,7 +402,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   listStyle: {
-    // marginBottom: 10,
+    marginBottom: Platform.select({ios: 10, android: 0}),
   },
   listContentStyle: {
     paddingTop: 10,
@@ -465,6 +421,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 20,
   },
+  sectionTitle: {paddingLeft: 16},
 });
 
 export default HomeScreen;
