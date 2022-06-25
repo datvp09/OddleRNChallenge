@@ -15,6 +15,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import {QUERY_LIMIT} from '../core/request';
 import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import CardPlaceHolder from '../components/CardPlaceHolder';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 const ShopScreen = ({params}) => {
   const [listItems, setListItems] = useState([]);
@@ -23,6 +25,8 @@ const ShopScreen = ({params}) => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
+
+  console.log('refreshing', refreshing);
 
   useEffect(() => {
     getProductList();
@@ -73,7 +77,7 @@ const ShopScreen = ({params}) => {
       return null;
     }
     return (
-      <View style={{paddingVertical: 10, paddingHorizontal: 10}}>
+      <View style={{paddingTop: 10, paddingBottom: 15, paddingHorizontal: 10}}>
         <Text style={styles.totalItems}>{`${formatNumber(
           totalItems,
         )} products sorted by price`}</Text>
@@ -92,6 +96,21 @@ const ShopScreen = ({params}) => {
     );
   };
 
+  const renderListPlaceholder = () => {
+    return (
+      <View style={styles.listPlaceholder}>
+        <ShimmerPlaceHolder
+          LinearGradient={LinearGradient}
+          width={150}
+          height={18}
+          style={styles.summaryPlaceholder}
+        />
+        <CardPlaceHolder />
+        <CardPlaceHolder />
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['right', 'top', 'left']}>
       <AppHeader />
@@ -100,18 +119,23 @@ const ShopScreen = ({params}) => {
         start={{x: 0, y: 0}}
         end={{x: 0, y: 0.5}}
         style={styles.flex}>
-        <FlatList
-          data={listItems}
-          keyExtractor={item => `${item.productID}`}
-          renderItem={renderItems}
-          contentContainerStyle={styles.contentContainerStyle}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          onRefresh={onRefresh}
-          onEndReached={onEndReached}
-          ListHeaderComponent={renderHeader}
-          ListFooterComponent={renderFooter}
-        />
+        {listItems.length == 0 && refreshing ? (
+          renderListPlaceholder()
+        ) : (
+          <FlatList
+            data={listItems}
+            keyExtractor={item => `${item.productID}`}
+            renderItem={renderItems}
+            contentContainerStyle={styles.contentContainerStyle}
+            refreshing={refreshing}
+            showsVerticalScrollIndicator={false}
+            onRefresh={onRefresh}
+            onEndReached={onEndReached}
+            ListHeaderComponent={renderHeader}
+            ListFooterComponent={renderFooter}
+          />
+        )}
+        {/* {renderListPlaceholder()} */}
       </LinearGradient>
     </SafeAreaView>
   );
@@ -136,6 +160,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 30,
     paddingHorizontal: 16,
+  },
+  listPlaceholder: {alignItems: 'center', paddingTop: 20},
+  summaryPlaceholder: {
+    alignSelf: 'flex-start',
+    marginLeft: 30,
+    borderRadius: 6,
+    marginBottom: 18,
   },
 });
 

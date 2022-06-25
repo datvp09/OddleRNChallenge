@@ -1,5 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity, Linking} from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  PlatformColor,
+  Platform,
+} from 'react-native';
 import axios from 'axios';
 import Colors from '../utils/colors';
 import Images from '../utils/images';
@@ -26,7 +34,6 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   } = item;
   const [productDetail, setProductDetail] = useState(isFavourite ? item : {});
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
   const {favouriteProducts, getFavouriteProducts} = useFavouriteData();
   const productId = isFavourite ? productDetail?.id : productID;
   const isLiked =
@@ -73,13 +80,6 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
       return null;
     }
 
-    // if (imageLoading) {
-    //   return (
-    //     <View style={styles.imageLoading}>
-    //       <ActivityIndicator />
-    //     </View>
-    //   );
-    // }
     return (
       <DoubleTap onDoubleTap={onImageDoubleTap}>
         <FastImage
@@ -91,7 +91,6 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
           resizeMode={FastImage.resizeMode.contain}
           style={styles.productImage}
           onError={onImageNotFound}
-          onLoadEnd={() => setImageLoading(false)}
         />
       </DoubleTap>
     );
@@ -118,7 +117,9 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
 
     const url = productDetail?.productLink;
     if (await InAppBrowser.isAvailable()) {
-      InAppBrowser.open(url, {});
+      InAppBrowser.open(url, {
+        toolbarColor: 'black',
+      });
     } else {
       Linking.open(url);
     }
@@ -202,15 +203,8 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.smokeGrey,
-    // height: 372,
-    // flex: 1,
-    marginBottom: 25,
-    borderRadius: 8,
-    // borderWidth: 1,
-    // borderColor: 'red',
+const shadow = Platform.select({
+  ios: {
     shadowColor: 'rgba(0, 0, 0, 0.2)',
     shadowOffset: {
       width: 0,
@@ -218,6 +212,18 @@ const styles = StyleSheet.create({
     },
     shadowRadius: 10,
     shadowOpacity: 1,
+  },
+  android: {
+    elevation: 6,
+  },
+});
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+    marginBottom: 25,
+    borderRadius: 8,
+    ...shadow,
   },
   imageWrap: {
     height: 205,
@@ -235,13 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowRadius: 2,
-    shadowOpacity: 1,
+    ...shadow,
     paddingTop: 1,
   },
   contentWrap: {
@@ -249,17 +249,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
     paddingHorizontal: 8,
+    backgroundColor: Colors.smokeGrey,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
     // borderWidth: 1,
     // borderColor: 'red',
   },
   contents: {marginBottom: 15},
-  imageLoading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
   productImage: {
     flex: 1,
     borderTopLeftRadius: 8,

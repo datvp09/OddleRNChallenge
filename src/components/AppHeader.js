@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, Platform} from 'react-native';
 import {welcomeText} from '../utils/functions';
 import Credential from '../config/credential';
 import Colors from '../utils/colors';
@@ -14,7 +14,7 @@ const AppHeader = ({useShortName = true}) => {
   return (
     <View style={styles.header}>
       <FastImage source={Images.defaultAvatar} style={styles.avatar} />
-      <View>
+      <View style={styles.flex}>
         <Text style={styles.welcomeText}>{welcomeText()}</Text>
         <Text style={styles.username}>{username}</Text>
       </View>
@@ -29,6 +29,7 @@ const titleStyle = {
 };
 
 const styles = StyleSheet.create({
+  flex: {flex: 1},
   avatar: {
     width: 50,
     height: 50,
@@ -40,6 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    paddingTop: Platform.select({ios: 0, android: 6}),
   },
   welcomeText: {
     color: Colors.charcoal,

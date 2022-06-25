@@ -10,7 +10,11 @@ const CardPlaceHolder = ({horizontal, style = {}}) => {
       LinearGradient={LinearGradient}
       width={horizontal ? 280 : width - 36}
       height={390}
-      style={[styles.container, horizontal && {marginRight: 20}, style]}
+      style={[
+        styles.container,
+        horizontal ? {marginRight: 20} : {marginBottom: 20},
+        style,
+      ]}
     />
   );
 };

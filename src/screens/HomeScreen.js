@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import {
   fetchEndpoint,
@@ -106,7 +107,7 @@ const HomeScreen = ({params}) => {
     productType,
     {isRefresh = false, isFetchingMore = false},
   ) => {
-    if (!isRefresh && !isFetchingMore) {
+    if (!isRefresh && !isFetchingMore && listRecommended.length == 0) {
       setFetchingRecommended(true);
     }
     try {
@@ -139,7 +140,7 @@ const HomeScreen = ({params}) => {
     brand,
     {isRefresh = false, isFetchingMore = false},
   ) => {
-    if (!isRefresh && !isFetchingMore) {
+    if (!isRefresh && !isFetchingMore && listSimilar.length == 0) {
       setFetchingSimilar(true);
     }
     try {
@@ -172,7 +173,7 @@ const HomeScreen = ({params}) => {
     isRefresh = false,
     isFetchingMore = false,
   }) => {
-    if (!isRefresh && !isFetchingMore) {
+    if (!isRefresh && !isFetchingMore && listTrending.length == 0) {
       setFetchingTrending(true);
     }
     try {
@@ -327,6 +328,7 @@ const HomeScreen = ({params}) => {
               (onRecommendEndReachCalledDuringMomentum.current = false)
             }
             horizontal
+            removeClippedSubviews
             showsHorizontalScrollIndicator={false}
             style={styles.listStyle}
             contentContainerStyle={styles.listContentStyle}
@@ -352,6 +354,7 @@ const HomeScreen = ({params}) => {
               (onSimilarEndReachCalledDuringMomentum.current = false)
             }
             horizontal
+            removeClippedSubviews
             showsHorizontalScrollIndicator={false}
             style={styles.listStyle}
             contentContainerStyle={styles.listContentStyle}
@@ -378,6 +381,7 @@ const HomeScreen = ({params}) => {
               (onTrendingEndReachCalledDuringMomentum.current = false)
             }
             horizontal
+            removeClippedSubviews
             showsHorizontalScrollIndicator={false}
             style={styles.listStyle}
             contentContainerStyle={styles.listContentStyle}
@@ -393,8 +397,8 @@ const HomeScreen = ({params}) => {
       <SafeAreaView>
         <AppHeader useShortName={false} />
         <ScrollView
-          style={{height: '100%'}}
-          contentContainerStyle={{paddingTop: 20, paddingBottom: 130}}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
@@ -414,8 +418,12 @@ const titleStyle = {
 
 const styles = StyleSheet.create({
   safeArea: {
-    // flex: 1,
     paddingBottom: 0,
+  },
+  scrollView: {height: '100%'},
+  scrollViewContent: {
+    paddingTop: 6,
+    paddingBottom: Platform.select({ios: 130, android: 195}),
   },
   container: {
     paddingVertical: 18,
@@ -435,10 +443,10 @@ const styles = StyleSheet.create({
   },
   title: {
     ...titleStyle,
-    marginBottom: 10,
+    marginBottom: 3,
   },
   listStyle: {
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   listContentStyle: {
     paddingTop: 10,

@@ -23,7 +23,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const MainStack = () => {
-  const tabBarHeight = 68;
+  const tabBarHeight = 57;
   // const {
   //   userInfo: {messageList},
   // } = store.getState();
@@ -49,10 +49,25 @@ const MainStack = () => {
         headerShown: false,
         tabBarStyle: {
           paddingHorizontal: 15,
-          // height: tabBarHeight,
-          paddingBottom: 25,
+          paddingTop: 0,
+          height: tabBarHeight,
+          // paddingBottom: 25,
         },
-        tabBarLabelStyle: {fontSize: 10},
+        // tabBarIconStyle: {
+        //   // alignItems: 'flex-end',
+        //   // justifyContent: 'flex-end',
+        //   // alignSelf: 'flex-end',
+        //   borderWidth: 1,
+        //   borderColor: 'red',
+        //   marginBottom: 0,
+        // },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontFamily: 'IBMPlexSans-Medium',
+          // marginBottom: 2,
+          // borderWidth: 1,
+          // borderColor: 'red',
+        },
         tabBarInactiveTintColor: Colors.tiber,
         tabBarActiveTintColor: Colors.tiber,
         tabBarIcon: ({focused, color, size}) => {
@@ -64,7 +79,7 @@ const MainStack = () => {
             iconName = focused ? 'home-selected' : 'home';
           } else if (route.name == ROUTE_TAB_SHOP) {
             // iconSource = focused ? Images.moneySelected : Images.moneyIcon;
-            iconSize = 38;
+            iconSize = 40;
             iconName = focused ? 'money-selected' : 'money';
             // return (
             //   <Image
@@ -93,7 +108,7 @@ const MainStack = () => {
             <SvgIcon
               name={iconName}
               size={iconSize}
-              style={
+              style={[
                 iconName.includes('money') && {
                   width: 40,
                   height: 40,
@@ -101,8 +116,14 @@ const MainStack = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   bottom: 5,
-                }
-              }
+                },
+                {
+                  // borderWidth: 1,
+                  // borderColor: 'red',
+                  // marginBottom: 0,
+                  // justifyContent: 'flex-end',
+                },
+              ]}
             />
           );
         },
