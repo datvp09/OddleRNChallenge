@@ -69,7 +69,6 @@ const Router = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: false,
-      gestureEnabled: false,
     }}
     initialRouteName={'MainStack'}>
     <Stack.Screen name="MainStack" component={MainStack} />
