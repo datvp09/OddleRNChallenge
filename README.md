@@ -22,6 +22,13 @@ cd OddleRNChallenge && npm install
 
 npx pod-install
 ```
+Create `credential.js` file in `src/config` folder and put your GraphCMS credential inside
+```
+export default {
+  accountName: ---YOUR ACCOUNT NAME---,
+  apiKey: ---YOUR API KEY---,
+};
+```
 Make sure SDK Enviroment is setup properly and run:
 ```
 react-native run-android/ios
