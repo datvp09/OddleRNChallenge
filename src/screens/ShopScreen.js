@@ -12,7 +12,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import CardPlaceholder from '../components/CardPlaceholder';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
-const ShopScreen = ({params}) => {
+const ShopScreen = () => {
   const [listItems, setListItems] = useState([]);
   const [totalItems, setTotalItems] = useState();
   const [currentPage, setCurrentPage] = useState(0);

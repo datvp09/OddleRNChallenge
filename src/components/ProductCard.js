@@ -34,7 +34,12 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   } = item;
   const [productDetail, setProductDetail] = useState(isFavourite ? item : {});
   const [imageError, setImageError] = useState(false);
-  const {favouriteProducts, getFavouriteProducts} = useFavouriteData();
+  const {
+    favouriteProducts,
+    getFavouriteProducts,
+    changedFavourite,
+    setChangedFavourite,
+  } = useFavouriteData();
   const productId = isFavourite ? productDetail?.id : productID;
   const isLiked =
     isFavourite || favouriteProducts.map(pro => pro.id).includes(productId);
@@ -47,6 +52,19 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
       getProductDetail();
     }
   }, []);
+
+  useEffect(() => {
+    if (favouriteProducts.length == 0) {
+      setLikeStatus(false);
+    }
+  }, [favouriteProducts]);
+
+  useEffect(() => {
+    if (changedFavourite != null && productId == changedFavourite?.productId) {
+      setLikeStatus(changedFavourite?.status);
+      setChangedFavourite(null);
+    }
+  }, [changedFavourite, productId]);
 
   const onImageNotFound = () => {
     setImageError(true);
@@ -115,13 +133,15 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   };
 
   const onFavouritePress = async () => {
+    const status = likeStatus;
     setLikeStatus(liked => !liked);
-    if (likeStatus) {
+    if (status) {
       await unlikeProduct(productId);
     } else {
       await likeProduct(productId);
       getFavouriteProducts();
     }
+    setChangedFavourite({productId, status: !status});
   };
 
   return (
