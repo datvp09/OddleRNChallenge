@@ -1,31 +1,21 @@
 import React, {useRef} from 'react';
-import {State, TapGestureHandler} from 'react-native-gesture-handler';
+import {TouchableWithoutFeedback} from 'react-native';
 
-export const DoubleTap = ({children, onSingleTap, onDoubleTap}) => {
-  const doubleTapRef = useRef(null);
+export const DoubleTap = ({children, delay = 300, onDoubleTap}) => {
+  const lastTap = useRef();
 
-  const onSingleTapEvent = event => {
-    if (event.nativeEvent.state === State.ACTIVE) {
-      onSingleTap?.();
-    }
-  };
-
-  const onDoubleTapEvent = event => {
-    if (event.nativeEvent.state === State.ACTIVE) {
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    if (lastTap.current && now - lastTap.current < delay) {
       onDoubleTap?.();
+    } else {
+      lastTap.current = now;
     }
   };
 
   return (
-    <TapGestureHandler
-      onHandlerStateChange={onSingleTapEvent}
-      waitFor={doubleTapRef}>
-      <TapGestureHandler
-        ref={doubleTapRef}
-        onHandlerStateChange={onDoubleTapEvent}
-        numberOfTaps={2}>
-        {children}
-      </TapGestureHandler>
-    </TapGestureHandler>
+    <TouchableWithoutFeedback onPress={handleDoubleTap}>
+      {children}
+    </TouchableWithoutFeedback>
   );
 };

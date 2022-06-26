@@ -1,21 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {Text, View, StyleSheet, FlatList} from 'react-native';
 import Colors from '../utils/colors';
 import ProductCard from '../components/ProductCard';
 import {getProductListQuery} from '../core/query';
 import {graphCMS} from '../core/graphcms';
-import {formatNumber, welcomeText} from '../utils/functions';
+import {formatNumber} from '../utils/functions';
 import LinearGradient from 'react-native-linear-gradient';
 import {QUERY_LIMIT} from '../core/api';
 import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import CardPlaceHolder from '../components/CardPlaceHolder';
+import CardPlaceholder from '../components/CardPlaceholder';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 const ShopScreen = ({params}) => {
@@ -25,6 +19,7 @@ const ShopScreen = ({params}) => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
+  const scrollViewRef = useRef();
 
   useEffect(() => {
     getProductList();
@@ -72,6 +67,7 @@ const ShopScreen = ({params}) => {
     if (!totalItems) {
       return null;
     }
+
     return (
       <View style={{paddingTop: 10, paddingBottom: 15, paddingHorizontal: 10}}>
         <Text style={styles.totalItems}>{`${formatNumber(
@@ -85,11 +81,7 @@ const ShopScreen = ({params}) => {
     if (!fetchingMore) {
       return null;
     }
-    return (
-      <View style={styles.fetchingMore}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <CardPlaceholder />;
   };
 
   const renderListPlaceholder = () => {
@@ -101,8 +93,8 @@ const ShopScreen = ({params}) => {
           height={18}
           style={styles.summaryPlaceholder}
         />
-        <CardPlaceHolder />
-        <CardPlaceHolder />
+        <CardPlaceholder />
+        <CardPlaceholder />
       </View>
     );
   };
@@ -120,6 +112,7 @@ const ShopScreen = ({params}) => {
         ) : (
           <FlatList
             data={listItems}
+            ref={scrollViewRef}
             keyExtractor={item => `${item.productID}`}
             renderItem={renderItems}
             contentContainerStyle={styles.contentContainerStyle}
@@ -142,11 +135,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     paddingBottom: 0,
-  },
-  fetchingMore: {
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   totalItems: {
     color: Colors.charcoal,
