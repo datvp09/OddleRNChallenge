@@ -5,6 +5,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import RootNavigator from './src/core/navigators/RootNavigator';
 import {setCustomText} from 'react-native-global-props';
 import {FavouriteProvider} from './src/providers/FavouriteProvider';
+import {ScrollContextProvider} from './src/providers/ScrollProvider';
 
 const defaultTextProps = {
   style: {
@@ -20,12 +21,14 @@ const App = () => {
     <GestureHandlerRootView style={styles.flex}>
       <NavigationContainer>
         <FavouriteProvider>
-          <StatusBar
-            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={'transparent'}
-            translucent={true}
-          />
-          <RootNavigator />
+          <ScrollContextProvider>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              backgroundColor={'transparent'}
+              translucent={true}
+            />
+            <RootNavigator />
+          </ScrollContextProvider>
         </FavouriteProvider>
       </NavigationContainer>
     </GestureHandlerRootView>

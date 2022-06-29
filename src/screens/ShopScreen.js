@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {Text, View, StyleSheet, FlatList} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, StyleSheet} from 'react-native';
 import Colors from '../utils/colors';
 import ProductCard from '../components/ProductCard';
 import {getProductListQuery} from '../core/query';
@@ -11,6 +11,7 @@ import AppHeader from '../components/AppHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CardPlaceholder from '../components/CardPlaceholder';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+import {FlatList} from '../components/FlatListAware';
 
 const ShopScreen = () => {
   const [listItems, setListItems] = useState([]);
@@ -19,7 +20,6 @@ const ShopScreen = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
-  const scrollViewRef = useRef();
 
   useEffect(() => {
     getProductList();
@@ -101,7 +101,7 @@ const ShopScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['right', 'top', 'left']}>
-      <AppHeader />
+      <AppHeader whiteBackground />
       <LinearGradient
         colors={[Colors.lightPurple, Colors.aqua, Colors.white]}
         start={{x: 0, y: 0}}
@@ -112,7 +112,6 @@ const ShopScreen = () => {
         ) : (
           <FlatList
             data={listItems}
-            ref={scrollViewRef}
             keyExtractor={item => `${item.productID}`}
             renderItem={renderItems}
             contentContainerStyle={styles.contentContainerStyle}
