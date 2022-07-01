@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 import {width} from '../utils/constants';
 
-const CardPlaceHolder = ({horizontal, style = {}}) => {
+const CardPlaceholder = ({horizontal, style = {}}) => {
   return (
     <ShimmerPlaceHolder
       LinearGradient={LinearGradient}
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
   container: {borderRadius: 6},
 });
 
-export default CardPlaceHolder;
+export default CardPlaceholder;

@@ -58,3 +58,4 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+/src/config/credential.js

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
-  PlatformColor,
   Platform,
 } from 'react-native';
 import axios from 'axios';
@@ -19,6 +18,7 @@ import {InAppBrowser} from 'react-native-inappbrowser-reborn';
 import SvgIcon from './SvgIcon';
 import {likeProduct, unlikeProduct} from '../core/api';
 import {useFavouriteData} from '../providers/FavouriteProvider';
+import ImagePlaceholder from './ImagePlaceholder';
 
 const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   const {
@@ -34,26 +34,37 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   } = item;
   const [productDetail, setProductDetail] = useState(isFavourite ? item : {});
   const [imageError, setImageError] = useState(false);
-  const {favouriteProducts, getFavouriteProducts} = useFavouriteData();
+  const {
+    favouriteProducts,
+    getFavouriteProducts,
+    changedFavourite,
+    setChangedFavourite,
+  } = useFavouriteData();
   const productId = isFavourite ? productDetail?.id : productID;
   const isLiked =
     isFavourite || favouriteProducts.map(pro => pro.id).includes(productId);
   const [likeStatus, setLikeStatus] = useState(isLiked);
+  const [imageLoadEnd, setImageLoadEnd] = useState(false);
   const navigation = useNavigation();
-
-  // console.log(
-  //   'ProductCard-detail',
-  //   productId,
-  //   favouriteProducts,
-  //   isLiked,
-  //   likeStatus,
-  // );
 
   useEffect(() => {
     if (!isFavourite) {
       getProductDetail();
     }
   }, []);
+
+  useEffect(() => {
+    if (favouriteProducts.length == 0) {
+      setLikeStatus(false);
+    }
+  }, [favouriteProducts]);
+
+  useEffect(() => {
+    if (changedFavourite != null && productId == changedFavourite?.productId) {
+      setLikeStatus(changedFavourite?.status);
+      setChangedFavourite(null);
+    }
+  }, [changedFavourite, productId]);
 
   const onImageNotFound = () => {
     setImageError(true);
@@ -71,17 +82,11 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
     }
   };
 
-  const onImageDoubleTap = () => {
-    console.log('double tap image');
-  };
+  const onImageLoadEnd = () => setImageLoadEnd(true);
 
   const renderImage = () => {
-    if (!productDetail?.imageLink) {
-      return null;
-    }
-
     return (
-      <DoubleTap onDoubleTap={onImageDoubleTap}>
+      <DoubleTap onDoubleTap={onFavouritePress}>
         <FastImage
           source={{
             uri: imageError
@@ -91,7 +96,9 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
           resizeMode={FastImage.resizeMode.contain}
           style={styles.productImage}
           onError={onImageNotFound}
-        />
+          onLoadEnd={onImageLoadEnd}>
+          {!imageLoadEnd && <ImagePlaceholder />}
+        </FastImage>
       </DoubleTap>
     );
   };
@@ -126,14 +133,15 @@ const ProductCard = ({item, isFavourite = false, horizontal = false}) => {
   };
 
   const onFavouritePress = async () => {
+    const status = likeStatus;
     setLikeStatus(liked => !liked);
-    console.log('productId:', productId);
-    if (likeStatus) {
+    if (status) {
       await unlikeProduct(productId);
     } else {
       await likeProduct(productId);
       getFavouriteProducts();
     }
+    setChangedFavourite({productId, status: !status});
   };
 
   return (

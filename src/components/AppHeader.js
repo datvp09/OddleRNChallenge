@@ -5,14 +5,24 @@ import Credential from '../config/credential';
 import Colors from '../utils/colors';
 import Images from '../utils/images';
 import FastImage from 'react-native-fast-image';
+import {useScroller} from '../providers/ScrollProvider';
 
-const AppHeader = ({useShortName = true}) => {
+const AppHeader = ({useShortName = true, whiteBackground = false}) => {
   const username = useShortName
     ? Credential.accountName.slice(0, 8)
     : Credential.accountName;
 
+  const {opacity} = useScroller();
+
   return (
-    <View style={styles.header}>
+    <View
+      style={[
+        styles.header,
+        {
+          shadowOpacity: opacity,
+        },
+        whiteBackground && {backgroundColor: 'white'},
+      ]}>
       <FastImage source={Images.defaultAvatar} style={styles.avatar} />
       <View style={styles.flex}>
         <Text style={styles.welcomeText}>{welcomeText()}</Text>
@@ -40,8 +50,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingBottom: 6,
+    marginBottom: 2,
     paddingTop: Platform.select({ios: 0, android: 6}),
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {
+      width: 0,
+      height: 15,
+    },
+    shadowRadius: 10,
   },
   welcomeText: {
     color: Colors.charcoal,

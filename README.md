@@ -2,6 +2,9 @@
 
 A Product Listing App built in React Native that allows users to like their favorite product and receive a list of recommendations based on the products,
 
+* Full Name: Tran Tuan Dat
+* Email Address: ttdat009@gmail.com
+
 This project's using React Native 0.67.4, React 17.0.2, graphql-request, react-native-gesture-handler & react-native-fast-image with features:<br />
 * Like/unlike products
 * Personalized homepage based on user's favourite products
@@ -18,6 +21,13 @@ git clone https://github.com/datvp09/OddleRNChallenge.git
 cd OddleRNChallenge && npm install
 
 npx pod-install
+```
+Create `credential.js` file in `src/config` folder and put your GraphCMS credential inside
+```
+export default {
+  accountName: ---YOUR ACCOUNT NAME---,
+  apiKey: ---YOUR API KEY---,
+};
 ```
 Make sure SDK Enviroment is setup properly and run:
 ```

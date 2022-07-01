@@ -22,7 +22,7 @@ import {
   getTrendingProductQuery,
 } from '../core/query';
 import {QUERY_LIMIT} from '../core/api';
-import CardPlaceHolder from '../components/CardPlaceHolder';
+import CardPlaceholder from '../components/CardPlaceholder';
 import ListEmptyComponent from '../components/ListEmptyComponent';
 
 const HomeScreen = ({params}) => {
@@ -230,30 +230,30 @@ const HomeScreen = ({params}) => {
     if (!fetchingMoreRecommend) {
       return null;
     }
-    return <CardPlaceHolder horizontal />;
+    return <CardPlaceholder horizontal />;
   };
 
   const renderSimilarFooter = () => {
     if (!fetchingMoreSimilar) {
       return null;
     }
-    return <CardPlaceHolder horizontal />;
+    return <CardPlaceholder horizontal />;
   };
 
   const renderTrendingFooter = () => {
     if (!fetchingMoreTrending) {
       return null;
     }
-    return <CardPlaceHolder horizontal />;
+    return <CardPlaceholder horizontal />;
   };
 
   const renderListPlaceholder = () => {
     return (
       <View style={styles.listPlaceholder}>
-        <CardPlaceHolder horizontal />
-        <CardPlaceHolder horizontal />
-        <CardPlaceHolder horizontal />
-        <CardPlaceHolder horizontal />
+        <CardPlaceholder horizontal />
+        <CardPlaceholder horizontal />
+        <CardPlaceholder horizontal />
+        <CardPlaceholder horizontal />
       </View>
     );
   };
@@ -354,7 +354,11 @@ const HomeScreen = ({params}) => {
         <AppHeader useShortName={false} />
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
+          contentContainerStyle={[
+            styles.scrollViewContent,
+            favouriteProducts.length == 0 &&
+              !isFetching && {backgroundColor: 'white'},
+          ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />

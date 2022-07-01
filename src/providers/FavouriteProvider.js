@@ -5,11 +5,14 @@ const context = createContext({
   favouriteProducts: [],
   getFavouriteProducts: () => {},
   isFetching: false,
+  changedFavourite: null,
+  setChangedFavourite: () => {},
 });
 
 export const FavouriteProvider = ({children}) => {
   const [favouriteProducts, setFavouriteProducts] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
+  const [changedFavourite, setChangedFavourite] = useState();
 
   const getFavouriteProducts = async () => {
     setIsFetching(true);
@@ -29,6 +32,8 @@ export const FavouriteProvider = ({children}) => {
         favouriteProducts,
         getFavouriteProducts,
         isFetching,
+        changedFavourite,
+        setChangedFavourite,
       }}>
       {children}
     </context.Provider>
